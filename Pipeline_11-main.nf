@@ -5,9 +5,9 @@ params.ref = "${projectDir}/Reference/NC_000962.3.fasta"
 
 process trimming {
 
-    conda '${projectDir}/main_conda.yml'
+    conda 'fastp'
 
-    publishDir params.outdir + "/Trimming", mode: 'copy'
+    publishDir params.outdir, mode: 'copy'
 
     input:
         val sampleName
@@ -28,9 +28,9 @@ process trimming {
 
 process mapping {
 
-    conda '${projectDir}/main_conda.yml'
+    conda 'bwa'
 
-    publishDir params.outdir + "/Aligned", mode: 'copy'
+    publishDir params.outdir, mode: 'copy'
 
     input:
         val sampleName
