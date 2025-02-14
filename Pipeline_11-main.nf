@@ -7,7 +7,7 @@ process trimming {
 
     conda '${projectDir}/main_conda.yml'
 
-    publishDir params.ourdir + "/Trimming", mode: 'copy'
+    publishDir params.outdir + "/Trimming", mode: 'copy'
 
     input:
         val sampleName
