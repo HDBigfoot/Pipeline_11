@@ -1,4 +1,4 @@
-name: Pipeline_11-main
+name: main_conda
 channels:
     - conda-forge
     - bioconda
