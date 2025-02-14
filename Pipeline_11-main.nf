@@ -1,6 +1,7 @@
 #!/usr/bin/env nextflow
 
 params.outdir = "Results"
+params.ref = "${ProjectDir}/Reference/NC_000962.3.fasta"
 
 process trimming {
 
@@ -24,11 +25,36 @@ process trimming {
 
 }
 
+process mapping {
+
+    conda '${projectDir}/main_conda.yml'
+
+    publishDir params.outdir + "/Aligned", mode: 'copy'
+
+    input:
+        val sampleName
+        path fastp_R1
+        path fastp_R2
+        path ref
+
+    output:
+        path "${sampleName}_Aligned.sam", emit: bwa_Aligned
+
+    script:
+    """
+    bwa mem -M ${ref} ${fastp_R1} ${fastp_R2} > ${sampleName}_Aligned.sam
+    """
+
+}
+
 workflow {
+
+    ref_file = file(params.ref)
 
     sampleName_ch = Channel.fromPath(params.sample-names).splitCsv().view{ "After splitCsv: $it" }.flatten().view{ "After flatten: $it"}
     inputdir_ch = Channel.fromPath(params.inputdir)
 
     trimming(sampleName_ch, inputdir_ch)
+    mapping(sampleName_ch, trimming.out.fastp_R1, trimming.out.fastp_R2, ref_file)
 
 }
