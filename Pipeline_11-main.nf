@@ -13,8 +13,8 @@ process trimming {
         path inputdir
 
     output:
-        path "${sampleName}_R1_fastp.fastq.gz"
-        path "${sampleName}_R2_fastp.fastq.gz"
+        path "${sampleName}_R1_fastp.fastq.gz", emit: fastp_R1
+        path "${sampleName}_R2_fastp.fastq.gz", emit: fastp_R2
         path "${sampleName}.fastp.html"
 
     script:
