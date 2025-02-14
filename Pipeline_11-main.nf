@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 params.outdir = "Results"
-params.ref = "${ProjectDir}/Reference/NC_000962.3.fasta"
+params.ref = "${projectDir}/Reference/NC_000962.3.fasta"
 
 process trimming {
 
@@ -52,9 +52,9 @@ workflow {
 
     ref_file = file(params.ref)
 
-    sampleName_ch = Channel.fromPath(params.sample-name)
-    rawRead1_ch = Channel.fromPath(params.raw-read1)
-    rawRead2_ch = Channel.fromPath(params.raw-read2)
+    sampleName_ch = Channel.fromPath(params.sample_name)
+    rawRead1_ch = Channel.fromPath(params.raw_read1)
+    rawRead2_ch = Channel.fromPath(params.raw_read2)
 
     trimming(sampleName_ch, rawRead1_ch, rawRead2_ch)
     mapping(sampleName_ch, trimming.out.fastp_R1, trimming.out.fastp_R2, ref_file)
