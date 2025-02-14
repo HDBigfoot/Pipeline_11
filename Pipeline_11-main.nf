@@ -5,7 +5,7 @@ params.ref = "${projectDir}/Reference/NC_000962.3.fasta"
 
 process trimming {
 
-    conda '${projectDir}/main_conda.yml'
+    conda ${projectDir}/main_conda.yml
 
     publishDir params.outdir + "/Trimming", mode: 'copy'
 
