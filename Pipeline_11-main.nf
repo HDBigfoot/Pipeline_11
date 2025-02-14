@@ -11,7 +11,8 @@ process trimming {
 
     input:
         val sampleName
-        path inputdir
+        path rawRead1
+        path rawRead2
 
     output:
         path "${sampleName}_R1_fastp.fastq.gz", emit: fastp_R1
@@ -20,7 +21,7 @@ process trimming {
 
     script:
     """
-    fastp -i ${inputdir}/${sampleName}_1.fastq.gz -I ${inputdir}/${sampleName}_2.fastq.gz -o ${sampleName}_R1_fastp.fastq.gz -O ${sampleName}_R2_fastp.fastq.gz --length_required 50 --html ${sampleName}.fastp.html
+    fastp -i ${rawRead1} -I ${rawRead2} -o ${sampleName}_R1_fastp.fastq.gz -O ${sampleName}_R2_fastp.fastq.gz --length_required 50 --html ${sampleName}.fastp.html
     """
 
 }
@@ -51,10 +52,11 @@ workflow {
 
     ref_file = file(params.ref)
 
-    sampleName_ch = Channel.fromPath(params.sample-names).splitCsv().view{ "After splitCsv: $it" }.flatten().view{ "After flatten: $it"}
-    inputdir_ch = Channel.fromPath(params.inputdir)
+    sampleName_ch = Channel.fromPath(params.sample-name)
+    rawRead1_ch = Channel.fromPath(params.raw-read1)
+    rawRead2_ch = Channel.fromPath(params.raw-read2)
 
-    trimming(sampleName_ch, inputdir_ch)
+    trimming(sampleName_ch, rawRead1_ch, rawRead2_ch)
     mapping(sampleName_ch, trimming.out.fastp_R1, trimming.out.fastp_R2, ref_file)
 
 }
