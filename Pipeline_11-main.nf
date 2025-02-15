@@ -4,7 +4,7 @@ params.sample_name = "Sample"
 params.outdir = "Results"
 params.ref = "${projectDir}/Reference/NC_000962.3.fasta"
 params.ref_index = "${projectDir}/Reference/NC_000962.3.fasta.fai"
-params.ref_dict = "${projectDir}/Reference/NC_000962.3.fasta.dict"
+params.ref_dict = "${projectDir}/Reference/NC_000962.3.dict"
 
 log.info """
 Pipeline_11
@@ -99,7 +99,7 @@ process calling {
 
     conda 'gatk4'
 
-    publisdhDir params.outdir + "/Calling", mode: 'copy', saveAs: {filename -> if (filename.endsWith(".vcf")) {"${sample_name}_raw.snps.indels.vcf"}
+    publishDir params.outdir + "/Calling", mode: 'copy', saveAs: {filename -> if (filename.endsWith(".vcf")) {"${sampleName}_raw.snps.indels.vcf"}
                                                                   else if (filename.endsWith(".idx")) {"${sampleName}_raw.snps.indels.vcf.idx"}}
 
     input:
@@ -115,7 +115,35 @@ process calling {
 
     script:
     """
-    gatk HaplotypeCaller --sample-ploidy 1 --R ${ref} --I ${bam_processed} --O ${bam_processed}_raw.snps.indels.vcf --max-assembly-region-size 600 --standerd-min-confidence-threshold-for-calling 30.0 --min-assembly-region-size 300
+    gatk HaplotypeCaller --sample-ploidy 1 --R ${ref} --I ${bam_processed} --O ${bam_processed}_raw.snps.indels.vcf --max-assembly-region-size 600 --standard-min-confidence-threshold-for-calling 30.0 --min-assembly-region-size 300
+    """
+
+}
+
+process filtering {
+
+    conda 'gatk4'
+
+    publishDir params.outdir + "/Calling", mode: 'copy', saveAs: {filename -> if (filename.endsWith("_clean.snps.vcf")) {"${sampleName}.vcf"}
+                                                                  else if (filename.endsWith("_clean.snps.vcf.idx")) {"${sampleName}.vcf.idx"}}
+
+    input:
+        val sampleName
+        path vcf
+        path idx
+        path ref
+        path ref_index
+        path ref_dict
+
+    output:
+        path "${vcf}_clean.snps.vcf"
+        path "${vcf}_clean.snps.vcf.idx"
+
+    script:
+    """
+    gatk SelectVariants --R ${ref} --V ${vcf} --select-type-to-include SNP --O ${vcf}_raw.snps.vcf
+    gatk VariantFiltration --R ${ref} --V ${vcf}_raw.snps.vcf --filter-expression "QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || DP < 12" --filter-name "FAILED" --O ${vcf}_flagged.snps.vcf
+    gatk SelectVariants --R ${ref} --V ${vcf}_flagged.snps.vcf --exclude-filtered --O ${vcf}_clean.snps.vcf
     """
 
 }
@@ -133,6 +161,7 @@ workflow {
     trimming(sampleName_ch, rawRead1_ch, rawRead2_ch)
     mapping(sampleName_ch, trimming.out.fastp_R1, trimming.out.fastp_R2, ref_file, ref_index_file, ref_dict_file)
     dedup(sampleName_ch, mapping.out.bwa_aligned, ref_file, ref_index_file, ref_dict_file)
-    calling(sampleName_ch, dedup.out.bam_processed, ref_file, ref_index_file, ref_dict_file
+    calling(sampleName_ch, dedup.out.bam_processed, ref_file, ref_index_file, ref_dict_file)
+    filtering(sampleName_ch, calling.out.vcf, calling.out.idx, ref_file, ref_index_file, ref_dict_file)
 
 }
