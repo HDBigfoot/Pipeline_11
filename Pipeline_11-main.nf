@@ -133,5 +133,6 @@ workflow {
     trimming(sampleName_ch, rawRead1_ch, rawRead2_ch)
     mapping(sampleName_ch, trimming.out.fastp_R1, trimming.out.fastp_R2, ref_file, ref_index_file, ref_dict_file)
     dedup(sampleName_ch, mapping.out.bwa_aligned, ref_file, ref_index_file, ref_dict_file)
+    calling(sampleName_ch, dedup.out.bam_processed, ref_file, ref_index_file, ref_dict_file
 
 }
