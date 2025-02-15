@@ -95,6 +95,31 @@ process dedup {
 
 }
 
+process calling {
+
+    conda 'gatk4'
+
+    publisdhDir params.outdir + "/Calling", mode: 'copy', saveAs: {filename -> if (filename.endsWith(".vcf")) {"${sample_name}_raw.snps.indels.vcf"}
+                                                                  else if (filename.endsWith(".idx")) {"${sampleName}_raw.snps.indels.vcf.idx"}}
+
+    input:
+        val sampleName
+        path bam_processed
+        path ref
+        path ref_index
+        path ref_dict
+
+    output:
+        path "${bam_processed}_raw.snps.indels.vcf", emit: vcf
+        path "${bam_processed}_raw.snps.indels.vcf.idx", emit: idx
+
+    script:
+    """
+    gatk HaplotypeCaller --sample-ploidy 1 --R ${ref} --I ${bam_processed} --O ${bam_processed}_raw.snps.indels.vcf --max-assembly-region-size 600 --standerd-min-confidence-threshold-for-calling 30.0 --min-assembly-region-size 300
+    """
+
+}
+
 workflow {
 
     ref_file = file(params.ref)
