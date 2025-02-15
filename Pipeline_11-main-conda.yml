@@ -1,0 +1,8 @@
+name: Pipeline_11-main
+channels:
+    - conda-forge
+    - bioconda
+dependencies:
+    - bwa
+    - gatk4
+    - fastp
