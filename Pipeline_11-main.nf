@@ -46,7 +46,7 @@ process mapping {
 
     conda 'bwa'
 
-    publishDir params.outdir + "/Aligned", mode: 'copy', saveAs: { filename -> "${sampleName}_Aligned.sam"}
+    publishDir params.outdir + "/Aligned", mode: 'copy', saveAs: { filename -> "${sampleName}_aligned.sam"}
 
     input:
         val sampleName
@@ -57,12 +57,40 @@ process mapping {
         path ref_dict
 
     output:
-        path "${fastp_R1}_Aligned.sam", emit: bwa_Aligned
+        path "${fastp_R1}_aligned.sam", emit: bwa_aligned
 
     script:
     """
     bwa index ${ref}
-    bwa mem -M ${ref} ${fastp_R1} ${fastp_R2} > ${fastp_R1}_Aligned.sam
+    bwa mem -M ${ref} ${fastp_R1} ${fastp_R2} > ${fastp_R1}_aligned.sam
+    """
+
+}
+
+process dedup {
+
+    conda 'gatk4'
+
+    publishDir params.outdir + "/Dedup", mode: copy', saveAs: { filename -> if (filename.endsWith("_metrics.txt")) {"${sampleName}_metrics.txt"}}
+                                                              else if (filename.endsWith("_dedup.bam")) {"${sampleName}_dedup.bam"}
+
+    input:
+        val sampleName
+        path bwa_aligned
+        path ref
+        path ref_index
+        path ref_dict
+
+    output:
+        path "${bwa_aligned}_metrics.txt"
+        path "${bwa_aligned}_dedup.bam", emit: bam_processed
+
+    script:
+    """
+    gatk FixMateInformation --ASSUME_SORTED false --I ${bwa_aligned} --O ${bwa_aligned}_fixed.bam
+    gatk SortSam --I ${bwa_aligned}_fixed.bam --O ${bwa_aligned}_sorted.bam --SO coordinate
+    gatk AddOrReplaceReadGroups --I ${bwa_aligned}_sorted.bam --RGLB lib1 --RGPL illumina --RGPU unit1 --RGSM ${sampleName} --O ${bwa_aligned}_rg.bam
+    gatk MarkDuplicates --REMOVE_DUPLICATES true --CREATE_INDEX true --ASSUME_SORTED true --I ${bwa_aligned}_rg.bam --M ${bwa_Aligned}_metrics.txt --O ${bwa_aligned}_dedup.bam
     """
 
 }
@@ -79,5 +107,6 @@ workflow {
 
     trimming(sampleName_ch, rawRead1_ch, rawRead2_ch)
     mapping(sampleName_ch, trimming.out.fastp_R1, trimming.out.fastp_R2, ref_file, ref_index_file, ref_dict_file)
+    dedup(sampleName_ch, mapping.out.bam_processed, ref_file, ref_index_file, ref_dict_file)
 
 }
