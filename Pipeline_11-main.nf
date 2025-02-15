@@ -21,9 +21,11 @@ process trimming {
 
     conda 'fastp'
 
-    // publishDir params.outdir + "/Trimming", mode: 'copy', saveAs: { filename -> if (filename.endsWith("1_fastp.fastq.gz")) {"${sampleName}_1_fastp.fastq.gz"}
-                                                                  else if (filename.endsWith("2_fastp.fastq.gz")) {"${sampleName}_2_fastp.fastq.gz"}
-                                                                  else if (filename.endsWith("html")) {"${sampleName}.fastp.html"}}
+    /*
+     *publishDir params.outdir + "/Trimming", mode: 'copy', saveAs: { filename -> if (filename.endsWith("1_fastp.fastq.gz")) {"${sampleName}_1_fastp.fastq.gz"}
+     *                                                              else if (filename.endsWith("2_fastp.fastq.gz")) {"${sampleName}_2_fastp.fastq.gz"}
+     *                                                              else if (filename.endsWith("html")) {"${sampleName}.fastp.html"}}
+     */
 
     input:
         val sampleName
@@ -46,7 +48,7 @@ process mapping {
 
     conda 'bwa'
 
-    // publishDir params.outdir + "/Aligned", mode: 'copy', saveAs: { filename -> "${sampleName}_aligned.sam"}
+    //publishDir params.outdir + "/Aligned", mode: 'copy', saveAs: { filename -> "${sampleName}_aligned.sam"}
 
     input:
         val sampleName
@@ -99,8 +101,11 @@ process calling {
 
     conda 'gatk4'
 
-    // publishDir params.outdir + "/Calling", mode: 'copy', saveAs: {filename -> if (filename.endsWith(".vcf")) {"${sampleName}_raw.snps.indels.vcf"}
-                                                                  else if (filename.endsWith(".idx")) {"${sampleName}_raw.snps.indels.vcf.idx"}}
+    /*
+     *publishDir params.outdir + "/Calling", mode: 'copy', saveAs: {filename -> if (filename.endsWith(".vcf")) {"${sampleName}_raw.snps.indels.vcf"}
+     *                                                             else if (filename.endsWith(".idx")) {"${sampleName}_raw.snps.indels.vcf.idx"}}
+     *
+     */
 
     input:
         val sampleName
