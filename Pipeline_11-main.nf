@@ -21,7 +21,7 @@ process trimming {
 
     conda 'fastp'
 
-    publishDir params.outdir + "/Trimming", mode: 'copy', saveAs: { filename -> if (filename.endsWith("1_fastp.fastq.gz")) {"${sampleName}_1_fastp.fastq.gz"}
+    // publishDir params.outdir + "/Trimming", mode: 'copy', saveAs: { filename -> if (filename.endsWith("1_fastp.fastq.gz")) {"${sampleName}_1_fastp.fastq.gz"}
                                                                   else if (filename.endsWith("2_fastp.fastq.gz")) {"${sampleName}_2_fastp.fastq.gz"}
                                                                   else if (filename.endsWith("html")) {"${sampleName}.fastp.html"}}
 
@@ -46,7 +46,7 @@ process mapping {
 
     conda 'bwa'
 
-    publishDir params.outdir + "/Aligned", mode: 'copy', saveAs: { filename -> "${sampleName}_aligned.sam"}
+    // publishDir params.outdir + "/Aligned", mode: 'copy', saveAs: { filename -> "${sampleName}_aligned.sam"}
 
     input:
         val sampleName
@@ -99,7 +99,7 @@ process calling {
 
     conda 'gatk4'
 
-    publishDir params.outdir + "/Calling", mode: 'copy', saveAs: {filename -> if (filename.endsWith(".vcf")) {"${sampleName}_raw.snps.indels.vcf"}
+    // publishDir params.outdir + "/Calling", mode: 'copy', saveAs: {filename -> if (filename.endsWith(".vcf")) {"${sampleName}_raw.snps.indels.vcf"}
                                                                   else if (filename.endsWith(".idx")) {"${sampleName}_raw.snps.indels.vcf.idx"}}
 
     input:
@@ -110,8 +110,8 @@ process calling {
         path ref_dict
 
     output:
-        path "${bam_processed}_raw.snps.indels.vcf", emit: vcf
-        path "${bam_processed}_raw.snps.indels.vcf.idx", emit: idx
+        path "${bam_processed}_raw.snps.indels.vcf", emit: called_vcf
+        path "${bam_processed}_raw.snps.indels.vcf.idx", emit: called_idx
 
     script:
     """
@@ -124,26 +124,51 @@ process filtering {
 
     conda 'gatk4'
 
-    publishDir params.outdir + "/Calling", mode: 'copy', saveAs: {filename -> if (filename.endsWith("_clean.snps.vcf")) {"${sampleName}.vcf"}
-                                                                  else if (filename.endsWith("_clean.snps.vcf.idx")) {"${sampleName}.vcf.idx"}}
+    publishDir params.outdir + "/VCF", mode: 'copy', saveAs: {filename -> if (filename.endsWith("_clean.snps.vcf")) {"${sampleName}.vcf"}
+                                                             else if (filename.endsWith("_clean.snps.vcf.idx")) {"${sampleName}.vcf.idx"}}
 
     input:
         val sampleName
-        path vcf
-        path idx
+        path called_vcf
+        path called_idx
         path ref
         path ref_index
         path ref_dict
 
     output:
-        path "${vcf}_clean.snps.vcf"
-        path "${vcf}_clean.snps.vcf.idx"
+        path "${called_vcf}_clean.snps.vcf", emit: clean_vcf
+        path "${called_vcf}_clean.snps.vcf.idx", emit: clean_idx
 
     script:
     """
-    gatk SelectVariants --R ${ref} --V ${vcf} --select-type-to-include SNP --O ${vcf}_raw.snps.vcf
-    gatk VariantFiltration --R ${ref} --V ${vcf}_raw.snps.vcf --filter-expression "QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || DP < 12" --filter-name "FAILED" --O ${vcf}_flagged.snps.vcf
-    gatk SelectVariants --R ${ref} --V ${vcf}_flagged.snps.vcf --exclude-filtered --O ${vcf}_clean.snps.vcf
+    gatk SelectVariants --R ${ref} --V ${called_vcf} --select-type-to-include SNP --O ${called_vcf}_raw.snps.vcf
+    gatk VariantFiltration --R ${ref} --V ${called_vcf}_raw.snps.vcf --filter-expression "QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || DP < 12" --filter-name "FAILED" --O ${called_vcf}_flagged.snps.vcf
+    gatk SelectVariants --R ${ref} --V ${called_vcf}_flagged.snps.vcf --exclude-filtered --O ${called_vcf}_clean.snps.vcf
+    """
+
+}
+
+process fastaConversion {
+
+    conda 'gatk4'
+
+    publishDir params.outdir + "/FASTA", mode: 'copy', saveAs: { filename -> "${sampleName}.fasta"}
+
+    input:
+        val sampleName
+        path clean_vcf
+        path clean_idx
+        path ref
+        path ref_index
+        path ref_dict
+
+    output:
+        path "${clean_vcf}_clean.fasta"
+
+    script:
+    """
+    gatk FastaAlternateReferenceMaker --R ${ref} --V ${clean_vcf} --O ${clean_vcf}_raw.fasta
+    sed 's/1 NC_000962.3:1-4411532/'${sampleName}'/' ${clean_vcf}_raw.fasta > ${clean_vcf}_clean.fasta
     """
 
 }
@@ -162,6 +187,7 @@ workflow {
     mapping(sampleName_ch, trimming.out.fastp_R1, trimming.out.fastp_R2, ref_file, ref_index_file, ref_dict_file)
     dedup(sampleName_ch, mapping.out.bwa_aligned, ref_file, ref_index_file, ref_dict_file)
     calling(sampleName_ch, dedup.out.bam_processed, ref_file, ref_index_file, ref_dict_file)
-    filtering(sampleName_ch, calling.out.vcf, calling.out.idx, ref_file, ref_index_file, ref_dict_file)
+    filtering(sampleName_ch, calling.out.called_vcf, calling.out.called_idx, ref_file, ref_index_file, ref_dict_file)
+    fastaConversion(sampleName_ch, filtering.out.clean_vcf, filtering.out.clean_idx, ref_file, ref_index_file, ref_dict_file)
 
 }
