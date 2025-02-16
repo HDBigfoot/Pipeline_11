@@ -3,6 +3,17 @@
 params.outdir = "Masking"
 params.project_name = "Project"
 
+log.info """
+Pipeline_11
+Combine and Mask Fastas
+RC3ID & CentraBioRes
+Universitas Padjadjaran
+================================
+project    : $params.project_name
+outdir     : $params.outdir
+================================
+"""
+
 process CombineFasta {
 
     conda 'seqkit'
