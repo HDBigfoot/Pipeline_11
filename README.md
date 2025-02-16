@@ -1,3 +1,7 @@
+# Pipeline_11
+
+(Logos/RC3ID.png) (Logos/CentraBioRes.jpeg)
+
 This is a bioinformatics pipeline I wrote for the analysis of Mycobacterium tuberculosis genomes for the Research Center for Care and Control of Infectious Diseases, Universitas Padjadjaran.
 
 This pipeline is modified from Mycodentifier (https://github.com/JordyCoolen/MyCodentifier.git)
