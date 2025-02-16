@@ -1,6 +1,6 @@
 # Pipeline_11
 
-![Unpad Logos](Logos/RC3ID.png)(Logos/CentraBioRes.jpeg)
+![RC3ID Logo](Logos/RC3ID.png) ![CentraBioRes Logo](Logos/CentraBioRes.jpeg)
 
 This is a bioinformatics pipeline I wrote for the analysis of Mycobacterium tuberculosis genomes for the Research Center for Care and Control of Infectious Diseases, Universitas Padjadjaran.
 
