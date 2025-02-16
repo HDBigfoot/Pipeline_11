@@ -6,12 +6,20 @@
 # then bedtools is run
 # bedtools maskfasta -fi my_sequences.fasta -bed 2022.09.06.tb_genomes_to_be_masked.bed -fo my_sequences.masked.fasta
 
-import sys
+import argparse
+import csv
+
+parser = argparse.ArgumentParser(description="process a CSV file.")
+parser.add_argument('csv_file', type=str, help='Path to the CSV file')
+
+args = parser.parse_args()
+
+with open(args.csv_file, mode='r') as file:
+	csv_reader = csv.reader(file)
+	samples = next(csv_reader)
 
 # samples is a list of all the contig names that need to be masked
-samples = sys.argv
-del samples[0]
-print(samples)
+samples = samples[:-1]
 
 # positions_to_mask is a list of tuples, where each tuple is a range within the reference
 # genome that needs to be masked
