@@ -2,7 +2,7 @@
 
 ![RC3ID Logo](Logos/PusrisLogos.jpg)
 
-This is a bioinformatics pipeline I wrote for the analysis of Mycobacterium tuberculosis genomes for the Research Center for Care and Control of Infectious Diseases, Universitas Padjadjaran.
+This is a bioinformatics pipeline I wrote for the analysis of Mycobacterium tuberculosis genomes for the Research Center for Care and Control of Infectious Diseases (RC3ID) and the Center for Translational Biomarker Research (CentraBioRes), Universitas Padjadjaran.
 
 This pipeline is modified from Mycodentifier (https://github.com/JordyCoolen/MyCodentifier.git)
 
