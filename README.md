@@ -26,7 +26,7 @@ git clone https://github.com/HDBigfoot/Pipeline_11.git
 Running main pipeline:
 
 ```bash
-nextflow run /PATH/TO/PROJECT/Pipeline_11/Pipeline_11-main.nf --raw_read1 /PATH/TO/RAW/READS/<sample_name>_1.fastq.gz --raw_read2 /PATH/TO/RAW/READS/<sample_name>.fastq.gz --sample_name <sample_name>
+nextflow run /PATH/TO/PROJECT/Pipeline_11/Pipeline_11-main.nf --raw_read1 /PATH/TO/RAW/READS/<sample_name>_1.fastq.gz --raw_read2 /PATH/TO/RAW/READS/<sample_name>_2.fastq.gz --sample_name <sample_name>
 ```
 
 Combining and masking FASTAs:
