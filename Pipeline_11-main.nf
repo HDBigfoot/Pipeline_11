@@ -22,7 +22,7 @@ include { Mapping } from '${projectDir}/modules/Mapping.nf'
 include { Dedup } from '${projectDir}/modules/Dedup.nf'
 include { Calling } from '${projectDir}/modules/Calling.nf'
 include { Filtering } from '${projectDir}/modules/Filtering.nf'
-include { fastaConversion } from '${projectDir}/modules/fastaConversion.nf'
+include { FastaConversion } from '${projectDir}/modules/FastaConversion.nf'
 
 workflow {
 
@@ -34,11 +34,11 @@ workflow {
     rawRead1_ch = Channel.fromPath(params.raw_read1)
     rawRead2_ch = Channel.fromPath(params.raw_read2)
 
-    trimming(sampleName_ch, rawRead1_ch, rawRead2_ch)
-    mapping(sampleName_ch, trimming.out.fastp_R1, trimming.out.fastp_R2, ref_file, ref_index_file, ref_dict_file)
-    dedup(sampleName_ch, mapping.out.bwa_aligned, ref_file, ref_index_file, ref_dict_file)
-    calling(sampleName_ch, dedup.out.bam_processed, ref_file, ref_index_file, ref_dict_file)
-    filtering(sampleName_ch, calling.out.called_vcf, calling.out.called_idx, ref_file, ref_index_file, ref_dict_file)
-    fastaConversion(sampleName_ch, filtering.out.clean_vcf, filtering.out.clean_idx, ref_file, ref_index_file, ref_dict_file)
+    Trimming(sampleName_ch, rawRead1_ch, rawRead2_ch)
+    Mapping(sampleName_ch, Trimming.out.fastp_R1, Trimming.out.fastp_R2, ref_file, ref_index_file, ref_dict_file)
+    Dedup(sampleName_ch, Mapping.out.bwa_aligned, ref_file, ref_index_file, ref_dict_file)
+    Calling(sampleName_ch, Dedup.out.bam_processed, ref_file, ref_index_file, ref_dict_file)
+    Filtering(sampleName_ch, Calling.out.called_vcf, Calling.out.called_idx, ref_file, ref_index_file, ref_dict_file)
+    FastaConversion(sampleName_ch, Filtering.out.clean_vcf, Filtering.out.clean_idx, ref_file, ref_index_file, ref_dict_file)
 
 }
