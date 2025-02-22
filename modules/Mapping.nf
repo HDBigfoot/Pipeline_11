@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-process mapping {
+process Mapping {
 
     conda 'bwa'
 
