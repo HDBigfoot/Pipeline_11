@@ -14,8 +14,8 @@ outdir     : $params.outdir
 ================================
 """
 
-include { CombineFasta } from '${projectDir}/modules/CombineFasta.nf'
-include { Masking } from '${projectDir}/modules/Masking.nf'
+include { CombineFasta } from './modules/CombineFasta.nf'
+include { Masking } from './modules/Masking.nf'
 
 
 workflow {

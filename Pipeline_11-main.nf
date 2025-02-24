@@ -17,12 +17,12 @@ outdir     : $params.outdir
 ================================
 """
 
-include { Trimming } from '${projectDir}/modules/Trimming.nf'
-include { Mapping } from '${projectDir}/modules/Mapping.nf'
-include { Dedup } from '${projectDir}/modules/Dedup.nf'
-include { Calling } from '${projectDir}/modules/Calling.nf'
-include { Filtering } from '${projectDir}/modules/Filtering.nf'
-include { FastaConversion } from '${projectDir}/modules/FastaConversion.nf'
+include { Trimming } from './modules/Trimming.nf'
+include { Mapping } from './modules/Mapping.nf'
+include { Dedup } from './modules/Dedup.nf'
+include { Calling } from './modules/Calling.nf'
+include { Filtering } from './modules/Filtering.nf'
+include { FastaConversion } from './modules/FastaConversion.nf'
 
 workflow {
 

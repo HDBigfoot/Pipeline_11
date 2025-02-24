@@ -14,8 +14,8 @@ outdir     : $params.outdir
 ================================
 """
 
-include { SnpDistanceAnalysis } from '${projectDir}/modules/SnpDistanceAnalysis.nf'
-include { RemoveDuplicates } from '${projectDir}/modules/RemoveDuplicates.nf'
+include { SnpDistanceAnalysis } from './modules/SnpDistanceAnalysis.nf'
+include { RemoveDuplicates } from './modules/RemoveDuplicates.nf'
 
 workflow {
 
